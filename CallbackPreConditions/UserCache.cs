@@ -12,31 +12,54 @@ namespace CallbackPreConditions
             _fileCachePath = fileCachePath;
         }
 
-        public async Task<User?> Get()
+        public User? Get()
         {
-            if (!File.Exists(_fileCachePath))
+            return WhenFileCacheAllowed(() =>
             {
-                return null;
-            }
+                if (!File.Exists(_fileCachePath))
+                {
+                    return null;
+                }
 
-            string userJson = await File.ReadAllTextAsync(_fileCachePath);
+                string userJson = File.ReadAllText(_fileCachePath);
 
-            if (userJson.Length == 0)
-            {
-                return null;
-            }
+                if (userJson.Length == 0)
+                {
+                    return null;
+                }
 
-            return JsonSerializer.Deserialize<User>(userJson);
+                return JsonSerializer.Deserialize<User>(userJson);
+            });
         }
 
-        public async Task Set(User user)
+        public void Set(User user)
         {
-            await File.WriteAllTextAsync(_fileCachePath, JsonSerializer.Serialize(user));
+            WhenFileCacheAllowed(() => File.WriteAllText(_fileCachePath, JsonSerializer.Serialize(user)));
         }
 
-        public async Task Clear()
+        public void Clear()
         {
-            await File.WriteAllTextAsync(_fileCachePath, string.Empty);
+            WhenFileCacheAllowed(() => File.WriteAllText(_fileCachePath, string.Empty));
+        }
+
+        private void WhenFileCacheAllowed(Action callback)
+        {
+            WhenFileCacheAllowed(() =>
+            {
+                callback();
+                return 0;
+            });
+        }
+
+        private T? WhenFileCacheAllowed<T>(Func<T> callback)
+        {
+            if (!HasFileCachePermission())
+            {
+                Console.WriteLine("File cache permission denied.");
+                return default;
+            }
+
+            return callback();
         }
 
         private bool HasFileCachePermission()
