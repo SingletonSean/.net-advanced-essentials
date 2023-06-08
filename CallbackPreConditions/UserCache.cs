@@ -14,29 +14,52 @@ namespace CallbackPreConditions
 
         public User? Get()
         {
-            if (!File.Exists(_fileCachePath))
+            return WhenFileCacheAllowed(() =>
             {
-                return null;
-            }
+                if (!File.Exists(_fileCachePath))
+                {
+                    return null;
+                }
 
-            string userJson = File.ReadAllText(_fileCachePath);
+                string userJson = File.ReadAllText(_fileCachePath);
 
-            if (userJson.Length == 0)
-            {
-                return null;
-            }
+                if (userJson.Length == 0)
+                {
+                    return null;
+                }
 
-            return JsonSerializer.Deserialize<User>(userJson);
+                return JsonSerializer.Deserialize<User>(userJson);
+            });
         }
 
         public void Set(User user)
         {
-            File.WriteAllText(_fileCachePath, JsonSerializer.Serialize(user));
+            WhenFileCacheAllowed(() => File.WriteAllText(_fileCachePath, JsonSerializer.Serialize(user)));
         }
 
         public void Clear()
         {
-            File.WriteAllText(_fileCachePath, string.Empty);
+            WhenFileCacheAllowed(() => File.WriteAllText(_fileCachePath, string.Empty));
+        }
+
+        private void WhenFileCacheAllowed(Action callback)
+        {
+            WhenFileCacheAllowed(() =>
+            {
+                callback();
+                return 0;
+            });
+        }
+
+        private T? WhenFileCacheAllowed<T>(Func<T?> callback)
+        {
+            if (!HasFileCachePermission())
+            {
+                Console.WriteLine("File cache permission denied.");
+                return default;
+            }
+
+            return callback();
         }
 
         private bool HasFileCachePermission()
