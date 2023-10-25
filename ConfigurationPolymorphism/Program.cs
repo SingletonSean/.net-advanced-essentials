@@ -1,5 +1,10 @@
 ﻿using ConfigurationPolymorphism;
 
-CartItem cartItem = new CartItem("Skateboard", 99.99m, false);
+Print(new CartItemBuilder("Skateboard", 99.99m).Build());
+Print(new CartItemBuilder("Skateboard", 99.99m).WithExtendedWarranty().Build());
+Print(new CartItemBuilder("Skateboard", 99.99m).WithExtendedWarranty().WithPromotion().Build());
 
-Console.WriteLine($"{cartItem.Name} | ${cartItem.Price} | {cartItem.WarrantyDays} day warranty");
+void Print(ICartItem cartItem)
+{
+    Console.WriteLine($"{cartItem.Name} | ${cartItem.Price} | {cartItem.WarrantyDays} day warranty");
+}
