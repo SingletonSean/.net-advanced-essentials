@@ -43,12 +43,15 @@ namespace WhyAsync
         }
 
         [RelayCommand]
-        private void LoadCatFactListing1()
+        private async Task LoadCatFactListing1()
         {
             IsLoadingListing1 = true;
             _catFactListing1.Clear();
 
-            IEnumerable<CatFact> catFacts = Task.Run(() => _catFactsQuery.Execute(5000)).GetAwaiter().GetResult();
+            IEnumerable<CatFact> catFacts = await _catFactsQuery.Execute();
+
+
+
             foreach (CatFact c in catFacts)
             {
                 _catFactListing1.Add(c.Content);
@@ -58,12 +61,12 @@ namespace WhyAsync
         }
 
         [RelayCommand]
-        private void LoadCatFactListing2()
+        private async Task LoadCatFactListing2()
         {
             IsLoadingListing2 = true;
             _catFactListing2.Clear();
 
-            IEnumerable<CatFact> catFacts = Task.Run(() => _catFactsQuery.Execute(10000)).GetAwaiter().GetResult();
+            IEnumerable<CatFact> catFacts = await _catFactsQuery.Execute(10000);
             foreach (CatFact c in catFacts)
             {
                 _catFactListing2.Add(c.Content);
