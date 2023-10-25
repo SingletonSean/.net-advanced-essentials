@@ -1,9 +1,10 @@
 ﻿using ConfigurationPolymorphism;
 
-Print(new CartItem("Skateboard", 99.99m, false));
-Print(new CartItem("Skateboard", 99.99m, true));
+CartItemBuilder cartItemBuilder = new CartItemBuilder("Skateboard", 99.99m);
 
-void Print(CartItem cartItem)
+Print(cartItemBuilder.WithExtendedWarranty().WithPromotion().Build());
+
+void Print(ICartItem cartItem)
 {
     Console.WriteLine($"{cartItem.Name} | ${cartItem.Price} | {cartItem.WarrantyDays} day warranty");
 }
